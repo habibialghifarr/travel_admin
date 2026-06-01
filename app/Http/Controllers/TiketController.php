@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Order; // PANGGIL MODEL ORDER YANG BARU
+use App\Models\Order; 
 use Illuminate\Support\Facades\Auth;
 
 class TiketController extends Controller
@@ -23,13 +23,11 @@ class TiketController extends Controller
         return view('tiket.index', compact('tikets'));
     }
 
-  public function pesan(Request $request)
+    public function pesan(Request $request)
     {
-        // 1. Ubah data string dari form menjadi angka murni
         $harga_dasar = (int) $request->harga_dasar;
         $jumlah_tiket = (int) $request->jumlah_tiket;
         
-        // 2. Hitung harga multiplier
         $multiplier = 1;
         if ($request->kelas === 'Bisnis') {
             $multiplier = 2;
@@ -37,11 +35,9 @@ class TiketController extends Controller
             $multiplier = 4;
         }
 
-        // 3. Kalkulasi total
         $total_harga = ($harga_dasar * $multiplier) * $jumlah_tiket;
 
-        // 4. Paksa simpan ke database
-        \App\Models\Order::create([
+        Order::create([
             'nama_lengkap' => $request->nama_lengkap ?? 'Guest Pembeli', 
             'gmail'        => $request->gmail ?? 'pembeli@travel.com',
             'alamat'       => $request->alamat ?? 'Tidak mengisi alamat',
@@ -56,32 +52,34 @@ class TiketController extends Controller
 
         return redirect()->route('tiket.index')->with('success_pesan', 'Tiket berhasil dipesan! Data sudah aman tersimpan di Database.');
     }
-public function adminBookings()
-{
-    // Ambil semua data dari model Order (tabel orders) urut dari yang terbaru
-    $bookings = \App\Models\Order::latest()->get();
 
-    // Lempar data ke file view blade admin
-    return view('admin.bookings', compact('bookings'));
-}
-    public function verifikasi($id)
+    // 1. HALAMAN MANIFEST & PENGHAPUSAN OTOMATIS > 12 JAM
+    public function adminBookings()
     {
-        // VERIFIKASI DI TABEL ORDERS
-        $booking = Order::findOrFail($id);
-        $booking->update([
-            'status' => 'Verified',
-            'verified_at' => now()->toIso8601String()
-        ]);
+        $batasWaktu = now()->subHours(12); 
+        Order::where('status', 'Verified')
+             ->where('updated_at', '<', $batasWaktu)
+             ->delete();
 
-        return back()->with('success', 'Tiket terverifikasi di database!');
+        $bookings = Order::latest()->get();
+        return view('admin.bookings', compact('bookings'));
     }
 
-    public function hapusBooking($id)
+    // 2. TOMBOL VERIFIKASI (Mulai Timer 12 Jam lewat updated_at)
+    public function verifyBooking($id)
     {
-        // HAPUS DI TABEL ORDERS
-        $booking = Order::findOrFail($id);
-        $booking->delete();
+        $order = Order::findOrFail($id);
+        $order->update([
+            'status' => 'Verified' 
+        ]);
+        return back()->with('success', 'Tiket diverifikasi! Timer 12 jam dimulai.');
+    }
 
-        return back()->with('success', 'Data berhasil dihapus.');
+    // 3. TOMBOL UN-VERIFIKASI (Tolak & Langsung Hapus)
+    public function unverifyBooking($id)
+    {
+        $order = Order::findOrFail($id);
+        $order->delete();
+        return back()->with('success', 'Data ditolak dan dihapus!');
     }
 }

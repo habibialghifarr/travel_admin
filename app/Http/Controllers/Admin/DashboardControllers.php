@@ -1,35 +1,38 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Tiket; // <-- UBAH DI SINI
+use App\Models\Tiket; 
 use App\Models\Booking;
+use App\Models\Order; // <-- KITA PANGGIL MODEL ORDER DI SINI BIAR RAPI
 use Illuminate\Http\Request;
 
 class DashboardControllers extends Controller
 {
     public function index()
     {
-        $totalPenjualan = Booking::where('status_pesanan', 'dibayar')->count();
-        $totalPendapatan = Booking::where('status_pesanan', 'dibayar')->sum('total_bayar');
-        $totalTiketTerbeli = Booking::where('status_pesanan', 'dibayar')->sum('jumlah_kursi');
-        $tiketTerbooking = Booking::where('status_pesanan', 'dibooking')->sum('jumlah_kursi');
+        // 1. Hitung data asli dari database tabel orders untuk angka di Card Dashboard
+        $total_pesanan = Order::count();
+        $total_tiket_terjual = Order::sum('jumlah_tiket');
+        $total_pendapatan = Order::sum('total_harga');
 
-        $daftarTiket = Tiket::latest()->get(); // <-- UBAH DI SINI
+        // 2. Ambil data tiket untuk tabel manajemen penerbangan di bagian bawah dashboard
+        $daftarTiket = Tiket::latest()->get(); 
 
+        // 3. LEMPAR SEMUA VARIABEL YANG DIBUTUHKAN KE VIEW
         return view('admin.dashboard', compact(
-            'totalPenjualan', 
-            'totalPendapatan', 
-            'totalTiketTerbeli', 
-            'tiketTerbooking', 
+            'total_pesanan', 
+            'total_tiket_terjual', 
+            'total_pendapatan', 
             'daftarTiket'
         ));
     }
 
     public function halamanPembooking()
     {
-        // Panggil relasi tiket yang baru
-        $semuaPembooking = Booking::with('tiket')->latest()->get(); // <-- UBAH DI SINI
+        // Menampilkan data pembooking lama (jika view admin.pembooking masih dipakai)
+        $semuaPembooking = Booking::with('tiket')->latest()->get(); 
         return view('admin.pembooking', compact('semuaPembooking'));
     }
 
@@ -45,18 +48,16 @@ class DashboardControllers extends Controller
             'sisa_stok' => 'required|numeric',
         ]);
 
-        Tiket::create($request->all()); // <-- UBAH DI SINI
+        Tiket::create($request->all()); 
         return back()->with('notif_sukses', 'Sip! Tiket penerbangan baru berhasil ditambahkan.');
     }
 
-    // Ubah parameter Ticket $ticket menjadi Tiket $tiket
     public function ubahTiket(Request $request, Tiket $tiket) 
     {
         $tiket->update($request->all());
         return back()->with('notif_sukses', 'Mantap! Data tiket berhasil diperbarui.');
     }
 
-    // Ubah parameter Ticket $ticket menjadi Tiket $tiket
     public function hapusTiket(Tiket $tiket) 
     {
         $tiket->delete();
