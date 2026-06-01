@@ -9,10 +9,17 @@ class Tiket extends Model
 {
     use HasFactory;
 
-    protected $guarded = []; 
+    // Definisikan nama tabel secara eksplisit
+    protected $table = 'tikets'; 
 
-    public function bookings()
-    {
-        return $this->hasMany(Booking::class);
-    }
+    // INI KUNCI UTAMANYA, BRO! Daftarkan semua kolom database lu di sini
+    protected $fillable = [
+        'nama_maskapai',
+        'nomor_penerbangan',
+        'bandara_asal',
+        'bandara_tujuan',
+        'waktu_berangkat',
+        'harga_tiket',
+        'sisa_stok',
+    ];
 }

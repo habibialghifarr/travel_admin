@@ -1,9 +1,6 @@
 @extends('layouts.admin')
 
 @section('konten')
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-    <h1 class="h3 fw-bold text-secondary">Ringkasan Data Hari Ini</h1>
-</div>
 
 <div class="row g-4 mb-4">
     <div class="col-sm-6 col-xl-3">
@@ -63,9 +60,9 @@
                     </button>
                 </div>
 
-                @if(session('success'))
+                @if(session('notif_sukses'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
+                        {{ session('notif_sukses') }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 @endif
@@ -98,52 +95,16 @@
                                     <button class="btn btn-sm btn-warning me-1" data-bs-toggle="modal" data-bs-target="#modalEdit{{ $tiket->id }}">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
-                                    <form action="{{ route('tiket.hapus', $tiket->id) }}" method="POST" class="d-inline">
-                                        @csrf @method('DELETE')
-                                        <button class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus tiket ini?')">
+                                    
+                                    <form action="{{ route('tiket.hapus', $tiket->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus tiket ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
                                 </td>
                             </tr>
-
-                            <div class="modal fade" id="modalEdit{{ $tiket->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <form action="{{ route('tiket.ubah', $tiket->id) }}" method="POST" class="modal-content">
-                                        @csrf @method('PUT')
-                                        <div class="modal-header">
-                                            <h5 class="modal-title fw-bold">Edit Tiket Penerbangan</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="mb-3">
-                                                <label class="form-label">Nama Maskapai</label>
-                                                <input type="text" name="nama_maskapai" class="form-control" value="{{ $tiket->nama_maskapai }}" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Bandara Asal</label>
-                                                <input type="text" name="bandara_asal" class="form-control" value="{{ $tiket->bandara_asal }}" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Bandara Tujuan</label>
-                                                <input type="text" name="bandara_tujuan" class="form-control" value="{{ $tiket->bandara_tujuan }}" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Harga Tiket</label>
-                                                <input type="number" name="harga_tiket" class="form-control" value="{{ $tiket->harga_tiket }}" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Sisa Stok Kursi</label>
-                                                <input type="number" name="sisa_stok" class="form-control" value="{{ $tiket->sisa_stok }}" required>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                            <button type="submit" class="btn btn-warning">Simpan Perubahan</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
                             @empty
                             <tr>
                                 <td colspan="5" class="text-center py-4 text-muted">
@@ -174,6 +135,10 @@
                     <input type="text" name="nama_maskapai" class="form-control" placeholder="Contoh: Garuda Indonesia" required>
                 </div>
                 <div class="mb-3">
+                    <label class="form-label">Nomor Penerbangan</label>
+                    <input type="text" name="nomor_penerbangan" class="form-control" placeholder="Contoh: GA-204" required>
+                </div>
+                <div class="mb-3">
                     <label class="form-label">Bandara Asal</label>
                     <input type="text" name="bandara_asal" class="form-control" placeholder="Contoh: JAKARTA (CGK)" required>
                 </div>
@@ -197,4 +162,5 @@
         </form>
     </div>
 </div>
+
 @endsection

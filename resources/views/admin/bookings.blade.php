@@ -9,7 +9,7 @@
     <div class="col-12 mb-4">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h4 class="card-title mb-4 fw-bold text-secondary">Data Transaksi Pemesan Hari Ini (Tabel Orders)</h4>
+      
                 
                 @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">

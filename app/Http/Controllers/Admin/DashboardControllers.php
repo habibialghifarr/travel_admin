@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Tiket; 
 use App\Models\Booking;
-use App\Models\Order; // <-- KITA PANGGIL MODEL ORDER DI SINI BIAR RAPI
+use App\Models\Order; 
 use Illuminate\Http\Request;
 
 class DashboardControllers extends Controller
@@ -31,24 +31,36 @@ class DashboardControllers extends Controller
 
     public function halamanPembooking()
     {
-        // Menampilkan data pembooking lama (jika view admin.pembooking masih dipakai)
+        // Menampilkan data pembooking lama
         $semuaPembooking = Booking::with('tiket')->latest()->get(); 
         return view('admin.pembooking', compact('semuaPembooking'));
     }
 
+    // GUA BERESIN METHOD INI BIAR GAK DOUBLE / BERTUMPUK LAGI, BRO!
     public function simpanTiket(Request $request)
     {
+        // 1. Validasi input dari form admin
         $request->validate([
-            'nama_maskapai' => 'required',
-            'nomor_penerbangan' => 'required',
-            'bandara_asal' => 'required',
-            'bandara_tujuan' => 'required',
-            'waktu_berangkat' => 'required',
-            'harga_tiket' => 'required|numeric',
-            'sisa_stok' => 'required|numeric',
+            'nama_maskapai'     => 'required|string|max:255',
+            'nomor_penerbangan' => 'required|string|max:50',
+            'bandara_asal'      => 'required|string|max:100',
+            'bandara_tujuan'    => 'required|string|max:100',
+            'harga_tiket'       => 'required|numeric|min:0',
+            'sisa_stok'         => 'required|integer|min:0',
         ]);
 
-        Tiket::create($request->all()); 
+        // 2. Simpan ke database menggunakan Model Tiket
+        Tiket::create([
+            'nama_maskapai'     => $request->nama_maskapai,
+            'nomor_penerbangan' => $request->nomor_penerbangan,
+            'bandara_asal'      => $request->bandara_asal,
+            'bandara_tujuan'    => $request->bandara_tujuan,
+            'waktu_berangkat'   => now(), // Isi waktu otomatis karena di form modal lu ga ada inputan jam
+            'harga_tiket'       => $request->harga_tiket,
+            'sisa_stok'         => $request->sisa_stok,
+        ]);
+
+        // 3. Kembalikan halaman dengan notif sukses (sesuai template admin lu)
         return back()->with('notif_sukses', 'Sip! Tiket penerbangan baru berhasil ditambahkan.');
     }
 

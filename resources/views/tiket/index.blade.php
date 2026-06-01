@@ -23,6 +23,7 @@
             font-size: 1.5rem;
             background: linear-gradient(to right, #da8cff, #9a55ff);
             -webkit-background-clip: text;
+            -webkit-text-color: transparent;
             -webkit-text-fill-color: transparent;
         }
         /* Header Gradasi Ungu */
@@ -56,9 +57,12 @@
             font-size: 0.9rem;
         }
         .airport-code {
-            font-size: 2rem;
+            font-size: 1.6rem;
             font-weight: 800;
             color: #343a40;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         /* Garis Putus-putus Rute Penerbangan */
         .flight-line {
@@ -116,11 +120,12 @@
                 Selamat Datang, <strong class="text-dark">{{ Auth::user()->name }}</strong> 
                 <span class="badge p-1 px-2 text-white ms-1" style="background: #9a55ff;">Pembeli</span>
             </span>
-           <form action="{{ route('logout') }}" method="POST" class="m-0">
-    @csrf <button class="btn btn-outline-danger btn-sm rounded-pill px-3">
-        <i class="fa-solid fa-power-off me-1"></i> Logout
-    </button>
-</form>
+            <form action="{{ route('logout') }}" method="POST" class="m-0">
+                @csrf 
+                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                    <i class="fa-solid fa-power-off me-1"></i> Logout
+                </button>
+            </form>
         </div>
     </div>
 </nav>
@@ -128,8 +133,8 @@
 <div class="container">
     <div class="page-header-gradient d-flex align-items-center justify-content-between">
         <div>
-            <h3 class="fw-bold mb-1">Cari & Pesan Tiket Internasional</h3>
-            <p class="mb-0 opacity-75">Silakan pilih destinasi luar negeri pilihanmu di bawah ini.</p>
+            <h3 class="fw-bold mb-1">Cari & Pesan Tiket Penerbangan</h3>
+            <p class="mb-0 opacity-75">Silakan pilih destinasi rute pilihanmu hasil real-time inputan admin.</p>
         </div>
         <i class="fa-solid fa-globe display-4 opacity-25 d-none d-md-block"></i>
     </div>
@@ -147,15 +152,15 @@
             
             <div class="col-md-9 d-flex flex-column justify-content-between">
                 <div class="ticket-purple-header d-flex justify-content-between w-100">
-                    <span><i class="fa-solid fa-passport me-2"></i> INTERNATIONAL BOARDING PASS</span>
-                    <span>FLIGHT CODE: <strong>{{ $tiket['flight'] }}</strong></span>
+                    <span><i class="fa-solid fa-passport me-2"></i> {{ strtoupper($tiket->nama_maskapai) }} BOARDING PASS</span>
+                    <span>FLIGHT CODE: <strong>{{ $tiket->nomor_penerbangan }}</strong></span>
                 </div>
                 
                 <div class="p-4 flex-grow-1 d-flex flex-column justify-content-center">
                     <div class="row align-items-center text-center mb-4">
                         <div class="col-4">
                             <small class="text-muted d-block small mb-1">FROM</small>
-                            <span class="airport-code d-block">{{ $tiket['from'] }}</span>
+                            <span class="airport-code d-block text-uppercase fw-bold">{{ $tiket->bandara_asal }}</span>
                         </div>
                         <div class="col-4 px-0 position-relative">
                             <div class="flight-line"></div>
@@ -163,7 +168,7 @@
                         </div>
                         <div class="col-4">
                             <small class="text-muted d-block small mb-1">TO</small>
-                            <span class="airport-code d-block">{{ $tiket['to'] }}</span>
+                            <span class="airport-code d-block text-uppercase fw-bold">{{ $tiket->bandara_tujuan }}</span>
                         </div>
                     </div>
 
@@ -171,25 +176,25 @@
                         <div class="col-3">
                             <div class="bg-light p-2 rounded-3 h-100">
                                 <small class="text-muted d-block" style="font-size: 0.75rem;">DATE</small>
-                                <strong class="text-dark small">{{ $tiket['date'] }}</strong>
+                                <strong class="text-dark small">18 JUN 2026</strong>
                             </div>
                         </div>
                         <div class="col-3">
                             <div class="bg-light p-2 rounded-3 h-100">
                                 <small class="text-muted d-block" style="font-size: 0.75rem;">TIME</small>
-                                <strong class="text-dark small">{{ $tiket['time'] }}</strong>
+                                <strong class="text-dark small">10:30 WIB</strong>
                             </div>
                         </div>
                         <div class="col-3">
                             <div class="bg-light p-2 rounded-3 h-100">
-                                <small class="text-muted d-block" style="font-size: 0.75rem;">GATE</small>
-                                <strong class="text-dark small">{{ $tiket['gate'] }}</strong>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">STOK</small>
+                                <strong class="text-danger small">{{ $tiket->sisa_stok }} Kursi</strong>
                             </div>
                         </div>
                         <div class="col-3">
                             <div class="bg-light p-2 rounded-3 h-100">
                                 <small class="text-muted d-block" style="font-size: 0.75rem;">BASE PRICE</small>
-                                <strong class="small" style="color: #9a55ff;">Rp {{ number_format($tiket['harga_dasar'], 0, ',', '.') }}</strong>
+                                <strong class="small" style="color: #9a55ff;">Rp {{ number_format($tiket->harga_tiket, 0, ',', '.') }}</strong>
                             </div>
                         </div>
                     </div>
@@ -199,7 +204,7 @@
             <div class="col-md-3 ticket-stub-purple text-center d-flex flex-column justify-content-center align-items-center p-4">
                 <i class="fa-solid fa-qrcode display-5 mb-2 text-secondary opacity-50"></i>
                 <small class="text-muted mb-3 d-block">Pemesanan Instan</small>
-                <button class="btn btn-purple-gradient shadow-sm w-100 py-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#modalPesan{{ $tiket['id'] }}">
+                <button class="btn btn-purple-gradient shadow-sm w-100 py-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#modalPesan{{ $tiket->id }}">
                     Booking Tiket
                 </button>
             </div>
@@ -207,7 +212,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalPesan{{ $tiket['id'] }}" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modalPesan{{ $tiket->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-3 overflow-hidden shadow-lg">
                 <div class="modal-header modal-header-purple">
@@ -216,28 +221,28 @@
                 </div>
                 <form action="{{ route('tiket.pesan') }}" method="POST">
                     @csrf
-                    <input type="hidden" name="flight" value="{{ $tiket['flight'] }}">
-                    <input type="hidden" name="from" value="{{ $tiket['from'] }}">
-                    <input type="hidden" name="to" value="{{ $tiket['to'] }}">
-                    <input type="hidden" name="harga_dasar" value="{{ $tiket['harga_dasar'] }}">
+                    <input type="hidden" name="flight" value="{{ $tiket->nomor_penerbangan }}">
+                    <input type="hidden" name="from" value="{{ $tiket->bandara_asal }}">
+                    <input type="hidden" name="to" value="{{ $tiket->bandara_tujuan }}">
+                    <input type="hidden" name="harga_dasar" value="{{ $tiket->harga_tiket }}">
 
                     <div class="modal-body p-4">
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-secondary">Nama Lengkap</label>
-                            <input type="text" name="nama_lengkap" class="form-control" placeholder="Contoh: Budi Santoso">
+                            <input type="text" name="nama_lengkap" class="form-control" placeholder="Contoh: Budi Santoso" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-secondary">Alamat Email Gmail</label>
-                            <input type="email" name="gmail" class="form-control" placeholder="budi@gmail.com">
+                            <input type="email" name="gmail" class="form-control" placeholder="budi@gmail.com" value="{{ Auth::user()->email ?? '' }}" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-secondary">Alamat Rumah</label>
-                            <textarea name="alamat" class="form-control" rows="2" placeholder="Masukkan alamat lengkap kota asal"></textarea>
+                            <textarea name="alamat" class="form-control" rows="2" placeholder="Masukkan alamat lengkap kota asal" required></textarea>
                         </div>
                         <div class="row">
                             <div class="col-6 mb-3">
                                 <label class="form-label small fw-bold text-secondary">Jumlah Tiket</label>
-                                <input type="number" name="jumlah_tiket" class="form-control" value="1" min="1">
+                                <input type="number" name="jumlah_tiket" class="form-control" value="1" min="1" max="{{ $tiket->sisa_stok }}" required>
                             </div>
                             <div class="col-6 mb-3">
                                 <label class="form-label small fw-bold text-secondary">Tingkatan Kelas</label>
@@ -260,7 +265,8 @@
             </div>
         </div>
     </div>
-    @endforeach </div>
+    @endforeach 
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
