@@ -1,66 +1,124 @@
-@extends('layouts.admin') {{-- Sesuaikan dengan nama layout admin kamu, jangan sampai salah --}}
+@extends('layouts.admin')
 
 @section('konten')
-<div class="container-fluid px-4 py-4">
-    <div class="mb-4">
-        <h2 class="fw-bold text-secondary">Manifes & Data Pembooking</h2>
-    </div>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h3 fw-bold text-secondary">Daftar Pembooking Tiket</h1>
+</div>
 
-    <div class="card shadow-sm border-0 rounded-3">
-        <div class="card-header bg-white py-3 border-bottom">
-            <h5 class="card-title fw-bold text-dark mb-0">Daftar Penumpang / Pemesan Aktif</h5>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 text-nowrap">
-                    <thead class="table-light text-secondary fw-semibold">
-                        <tr>
-                            <th class="ps-4">Nama Lengkap</th>
-                            <th>Kontak (Gmail)</th>
-                            <th>Rute & Penerbangan</th>
-                            <th>Kelas & Tiket</th>
-                            <th>Total Bayar</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($bookings as $book)
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title mb-4 fw-bold text-secondary">Data Transaksi Pemesan Hari Ini (Tabel Orders)</h4>
+                
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
                             <tr>
-                                <td class="ps-4 fw-bold text-dark">{{ $book->nama_lengkap }}</td>
-                                <td>{{ $book->gmail }}</td>
-                                <td>
-                                    <span class="fw-semibold">{{ $book->flight }}</span><br>
-                                    <small class="text-muted">{{ $book->from }} ✈️ {{ $book->to }}</small>
-                                </td>
-                                <td>
-                                    <span class="badge text-dark fw-semibold" style="background-color: #f3e8ff;">{{ $book->kelas }}</span><br>
-                                    <small class="text-secondary">{{ $book->jumlah_tiket }} Kursi</small>
-                                </td>
-                                <td class="fw-bold text-success">Rp {{ number_format($book->total_harga, 0, ',', '.') }}</td>
-                                <td>
-                                    @if($book->status == 'Pending')
-                                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Pending</span>
-                                    @else
-                                        <span class="badge bg-success px-3 py-2 rounded-pill">Success</span>
-                                    @endif
-                                </td>
+                                <th>No. Order</th>
+                                <th>Nama Pemesan</th>
+                                <th>Email</th>
+                                <th>Rute Penerbangan</th>
+                                <th>Jumlah Tiket</th>
+                                <th>Kelas</th>
+                                <th>Status / Sisa Waktu</th>
+                                <th class="text-center">Aksi Verifikasi</th>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    <div class="mb-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-folder-x text-warning" viewBox="0 0 16 16">
-                                            <path d="M.5 3 .04 4.35a.5.5 0 0 0 .496.568h14.928a.5.5 0 0 0 .496-.568L15.5 3H.5zM14.75 5H1.25L1 11h14l-.25-6zM2 2a1 1 0 0 1 1-1h3.293a1 1 0 0 1 .707.293L8.293 2H13a1 1 0 0 1 1 1v1H2V2z"/>
-                                        </svg>
-                                    </div>
-                                    Belum ada pesanan tiket yang masuk untuk saat ini.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                       <tbody>
+    @forelse($semuaPembooking as $order)
+    <tr>
+        <td><span class="fw-bold text-purple">#ORD-{{ $order->id }}</span></td>
+        <td><span class="fw-bold text-dark">{{ $order->nama_lengkap }}</span></td>
+        <td><span class="text-muted">{{ $order->gmail }}</span></td>
+        <td>
+            <span class="badge bg-dark">{{ $order->flight }}</span><br>
+            <small class="fw-bold text-secondary">{{ $order->from }} <i class="bi bi-arrow-right mx-1"></i> {{ $order->to }}</small>
+        </td>
+        <td><span class="badge bg-secondary">{{ $order->jumlah_tiket }} Kursi</span></td>
+        <td>
+            <span class="badge bg-info text-dark">{{ $order->kelas }}</span>
+        </td>
+        <td>
+            @if($order->verified_at)
+                <span class="badge bg-danger p-2 countdown-timer" 
+                      data-expire="{{ date('Y-m-d H:i:s', strtotime($order->verified_at . ' +12 hours')) }}">
+                    Menghitung...
+                </span>
+            @else
+                <span class="badge bg-warning text-dark p-2">Belum Diverifikasi</span>
+            @endif
+        </td>
+        <td>
+            <div class="d-flex align-items-center justify-content-center gap-1" style="min-width: 190px;">
+                @if(!$order->verified_at)
+                    <form action="{{ route('admin.bookings.verify', $order->id) }}" method="POST" class="d-inline m-0 p-0 flex-grow-1">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-success w-100 py-1 px-2 d-flex align-items-center justify-content-center" style="font-size: 11px; white-space: nowrap;">
+                            <i class="bi bi-check-circle-fill me-1"></i> Verifikasi
+                        </button>
+                    </form>
+
+                    <form action="{{ route('admin.bookings.unverify', $order->id) }}" method="POST" class="d-inline m-0 p-0 flex-grow-1" onsubmit="return confirm('Data janggal! Yakin ingin menghapus orderan ini dari database?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger w-100 py-1 px-2 d-flex align-items-center justify-content-center" style="font-size: 11px; white-space: nowrap;">
+                            <i class="bi bi-x-circle-fill me-1"></i> Un-verif
+                        </button>
+                    </form>
+                @else
+                    <span class="text-success fw-bold small d-flex align-items-center justify-content-center py-1">
+                        <i class="bi bi-shield-fill-check fs-5 me-1"></i> Order Fixed
+                    </span>
+                @endif
+            </div>
+        </td>
+    </tr>
+    @empty
+    <tr>
+        <td colspan="8" class="text-center py-4 text-muted">
+            <i class="bi bi-emoji-frown fs-2 d-block mb-2"></i>
+            Belum ada data pembooking di database.
+        </td>
+    </tr>
+    @endforelse
+</tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const timers = document.querySelectorAll('.countdown-timer');
+        
+        setInterval(function() {
+            timers.forEach(function(timer) {
+                const expireTime = new Date(timer.getAttribute('data-expire')).getTime();
+                const now = new Date().getTime();
+                const selisih = expireTime - now;
+
+                if (selisih <= 0) {
+                    timer.innerHTML = "WAKTU HABIS (Hapus pas refresh)";
+                    timer.classList.replace('bg-danger', 'bg-dark');
+                } else {
+                    const jam = Math.floor((selisih % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const menit = Math.floor((selisih % (1000 * 60 * 60)) / (1000 * 60));
+                    const detik = Math.floor((selisih % (1000 * 60)) / 1000);
+
+                    timer.innerHTML = `<i class="bi bi-clock-history me-1"></i> Hangus dlm: ${jam}j ${menit}m ${detik}d`;
+                }
+            });
+        }, 1000);
+    });
+</script>
 @endsection

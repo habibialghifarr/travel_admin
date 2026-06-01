@@ -110,7 +110,7 @@
 
 <nav class="navbar navbar-purple sticky-top mb-4">
     <div class="container">
-        <span class="navbar-brand-custom"><i class="fa-solid fa-plane-departure me-2"></i>TravelFly</span>
+        <span class="navbar-brand-custom"><i class="fa-solid fa-plane-departure me-2"></i>FLYVEL</span>
         <div class="d-flex align-items-center gap-3">
             <span class="text-secondary small d-none d-sm-inline">
                 Selamat Datang, <strong class="text-dark">{{ Auth::user()->name }}</strong> 

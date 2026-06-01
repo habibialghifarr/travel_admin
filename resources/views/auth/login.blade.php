@@ -144,11 +144,11 @@
             <div class="form-container">
                 
                 <div class="mb-4">
-                    <h3 class="logo-text m-0">TRAVEL-FLY</h3>
+                    <h4 class="logo-text m-0"><b>FLYVEL✈️</b></h4>
                 </div>
 
-                <h2 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">Sign in</h2>
-                <p class="text-muted small mb-4">Don't have an account? <a href="#" class="text-decoration-none" style="color: #9a55ff;">Create now</a></p>
+                <p>                <h2 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">Sign in</h2>
+</p>
 
                 @if(session('error_login'))
                     <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
@@ -184,16 +184,6 @@
 
                     <div class="position-relative text-center mb-4">
                         <hr class="text-muted">
-                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">OR</span>
-                    </div>
-
-                    <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-outline-custom rounded d-flex align-items-center justify-content-center gap-2">
-                            <i class="bi bi-google text-danger"></i> Continue with Google
-                        </button>
-                        <button type="button" class="btn btn-outline-custom rounded d-flex align-items-center justify-content-center gap-2">
-                            <i class="bi bi-facebook text-primary"></i> Continue with Facebook
-                        </button>
                     </div>
 
                 </form>

@@ -91,7 +91,7 @@
 
     <nav class="navbar navbar-expand-lg sticky-top navbar-light">
         <div class="container-fluid">
-            <a class="navbar-brand font-weight-bold fs-4 fw-bold mx-3 logo-text" href="#">TRAVEL-FLY</a>
+            <a class="navbar-brand font-weight-bold fs-4 fw-bold mx-3 logo-text" href="#"><h2> <b>FLYVEL✈️</b></h4></a>
         </div>
     </nav>
 

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    
     use HasFactory;
 
     // Pastikan ini sesuai dengan nama tabel di phpMyAdmin kamu (bisa 'orders' atau 'bookings')
@@ -14,4 +15,8 @@ class Order extends Model
 
     // BUKA SEMUA GEMBOK PROTEKSI FORM!
     protected $guarded = []; 
+
+    protected $casts = [
+        'verified_at' => 'datetime',
+        ];
 }

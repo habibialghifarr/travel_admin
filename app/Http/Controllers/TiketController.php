@@ -53,29 +53,28 @@ class TiketController extends Controller
         return redirect()->route('tiket.index')->with('success_pesan', 'Tiket berhasil dipesan! Data sudah aman tersimpan di Database.');
     }
 
-    // 1. HALAMAN MANIFEST & PENGHAPUSAN OTOMATIS > 12 JAM
-    public function adminBookings()
-    {
-        $batasWaktu = now()->subHours(12); 
-        Order::where('status', 'Verified')
-             ->where('updated_at', '<', $batasWaktu)
-             ->delete();
+    // HALAMAN MANIFEST & PENGHAPUSAN OTOMATIS > 12 JAM
+  public function adminBookings()
+{
+    // Mengambil data dari tabel orders (sesuai database phpMyAdmin lu)
+    $semuaPembooking = \App\Models\Order::latest()->get();
 
-        $bookings = Order::latest()->get();
-        return view('admin.bookings', compact('bookings'));
-    }
+    // Kirim data ke file view bookings
+    return view('admin.bookings', compact('semuaPembooking'));
+}
+    // TOMBOL VERIFIKASI (Mulai Timer 12 Jam lewat updated_at)
+   public function verifyBooking($id)
+{
+    $order = \App\Models\Order::findOrFail($id);
+    
+    // Simpan dengan format string date yang rapi agar dibaca sempurna oleh database & javascript
+    $order->verified_at = now()->toDateTimeString(); 
+    $order->save();
 
-    // 2. TOMBOL VERIFIKASI (Mulai Timer 12 Jam lewat updated_at)
-    public function verifyBooking($id)
-    {
-        $order = Order::findOrFail($id);
-        $order->update([
-            'status' => 'Verified' 
-        ]);
-        return back()->with('success', 'Tiket diverifikasi! Timer 12 jam dimulai.');
-    }
+    return redirect()->back()->with('success', 'Tiket diverifikasi! Timer 12 jam dimulai.');
+}
 
-    // 3. TOMBOL UN-VERIFIKASI (Tolak & Langsung Hapus)
+    // TOMBOL UN-VERIFIKASI (Tolak & Langsung Hapus)
     public function unverifyBooking($id)
     {
         $order = Order::findOrFail($id);
