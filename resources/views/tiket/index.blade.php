@@ -117,7 +117,7 @@
         <span class="navbar-brand-custom"><i class="fa-solid fa-plane-departure me-2"></i>FLYVEL</span>
         <div class="d-flex align-items-center gap-3">
             <span class="text-secondary small d-none d-sm-inline">
-                Selamat Datang, <strong class="text-dark">{{ Auth::user()->name }}</strong> 
+                Selamat Datang, <strong class="text-dark">{{ Auth::user()->name ?? 'Penumpang' }}</strong> 
                 <span class="badge p-1 px-2 text-white ms-1" style="background: #9a55ff;">Pembeli</span>
             </span>
             <form action="{{ route('logout') }}" method="POST" class="m-0">
@@ -139,9 +139,9 @@
         <i class="fa-solid fa-globe display-4 opacity-25 d-none d-md-block"></i>
     </div>
 
-    @if(session('success_pesan'))
+    @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4" role="alert" style="background-color: #d1e7dd; color: #0f5132;">
-            <i class="fa-solid fa-circle-check me-2"></i> {{ session('success_pesan') }}
+            <i class="fa-solid fa-circle-check me-2"></i> {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
